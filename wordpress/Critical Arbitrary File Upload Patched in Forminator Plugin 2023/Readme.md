@@ -1,7 +1,7 @@
 # Critical Arbitrary File Upload Patched in Forminator Plugin CVE-2023-4596.
 - CVE-2023-4596.
 ```js
-- The Forminator plugin for WordPress is vulnerable to arbitrary file uploads due to file type validation occurring 
+- The Forminator plugin for WordPress is vulnerable to arbitrary file uploads due to filed type validation occurring 
   after a file has been uploaded to the server in the upload_post_image() function in versions up to, and including, 1.24.6. 
 - This makes it possible for unauthenticated attackers to upload arbitrary files on the affected site's 
   server which may make remote code execution possible.
