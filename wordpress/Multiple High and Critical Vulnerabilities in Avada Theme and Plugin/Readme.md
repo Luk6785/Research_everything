@@ -1,10 +1,10 @@
 # Multiple High and Critical Vulnerabilities in Avada Theme and Plugin
 
-![Alt text](image.png)
+![Alt text](./images/image.png)
 
 - Nhiều lỗ hổng nghiêm trọng tồn tại trong Avada Theme <= 7.11.1 và Avada Builder plugin <= 3.11.1
 
-![Alt text](image-1.png)
+![Alt text](./images/image-1.png)
 
 ### Setup
 - Avada Theme 7.8.2
@@ -14,24 +14,24 @@
 
 
 - Thêm mới theme
-![Alt text](image-4.png)
+![Alt text](./images/image-4.png)
 - Như này là được 
-![Alt text](image-5.png)
+![Alt text](./images/image-5.png)
 - Thêm mới plugin và add mới
-![Alt text](image-2.png)
-![Alt text](image-3.png)
+![Alt text](./images/image-2.png)
+![Alt text](./images/image-3.png)
 
 ## I. Authenticated SQL Injection in Plugin
 - Enable Critical CSS để sử dụng được action trong ajax-admin
 - Vào Options > Performance > Enable Critical CSS (On) > Save Changes
 
-![Alt text](image-6.png)
+![Alt text](./images/image-6.png)
 
-![Alt text](image-7.png)
+![Alt text](./images/image-7.png)
 
 - Generate Critical Css
 
-![Alt text](image-8.png)
+![Alt text](./images/image-8.png)
 - Ảnh là đặt var_dump() vào \$query cho dễ debug
 
 - Lỗ hổng tại hàm wp-content/plugins/fusion-builder/inc/critical-css/class-awb-critical-css-page.php, function ajax_regenerate_css()
@@ -53,7 +53,7 @@ public function __construct() {
 }
 ```
 
-![Alt text](image-9.png)
+![Alt text](./images/image-9.png)
 
 - Id được lấy từ \$_GET['awb_critical_id']
 ```php
@@ -128,7 +128,7 @@ public function get( $args = [] ) {
 ```
 
 - Thực hiện union attack với time delay
-![Alt text](image-10.png)
+![Alt text](./images/image-10.png)
 
 - Payload
 ```php
@@ -153,13 +153,13 @@ Connection: close
 
 - Ở hàm wp-content/plugins/fusion-builder/inc/critical-css/class-awb-critical-css-page.php, function ajax_save_css() cũng tồn tại lỗ hổng sqli tương tự.
 
-![Alt text](image-11.png)
+![Alt text](./images/image-11.png)
 
 #### Giải pháp
 - Cách phòng chống sqli đơn giản cho id là ép kiểu về định dạng muốn.
 - Dùng intval() để ép thành kiểu nguyên
-![Alt text](image-12.png)
+![Alt text](./images/image-12.png)
 
 - Dùng esc_sql() của wordpress để escape dấu nháy thành 1 phần của truy vấn và không thể thoát ra câu truy vấn.
-![Alt text](image-13.png)
+![Alt text](./images/image-13.png)
 
